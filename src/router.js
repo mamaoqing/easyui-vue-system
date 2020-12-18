@@ -27,6 +27,33 @@ export default new Router({
         path: "/easyui",
         name: "easyUiHome",
         component: EasyHello
-    }
+    },
+    {
+      path: '/buildings',
+      component: () => import(/* webpackChunkName: "icon" */ './components/menu'),
+      meta: {title: '菜单树'}
+    },
+    {
+      path: '/unit',
+      component: () => import(/* webpackChunkName: "icon" */ './components/table'),
+      meta: {title: '表格'}
+    },
+    {
+      path: '/form',
+      component: () => import(/* webpackChunkName: "icon" */ './components/form'),
+      meta: {title: 'form表单'}
+    },
+    {
+      path: '/layout',
+      component: () => import(/* webpackChunkName: "icon" */ './components/layout'),
+      meta: {title: 'layout'}
+    },
   ]
 });
+
+//获取原型对象上的push函数
+const originalPush = Router.prototype.push
+//修改原型对象中的push方法
+Router.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}

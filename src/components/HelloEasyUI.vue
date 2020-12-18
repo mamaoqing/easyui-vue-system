@@ -1,37 +1,190 @@
 <template>
     <div>
-        <DataGrid :data="data" style="height:250px">
-            <GridColumn field="itemid" title="Item ID"></GridColumn>
+        <h2>Basic TreeGrid</h2>
+        <TreeGrid style="height: 100%"
+                  :data="data" idField="id" treeField="name">
             <GridColumn field="name" title="Name"></GridColumn>
-            <GridColumn field="listprice" title="List Price" align="right"></GridColumn>
-            <GridColumn field="unitcost" title="Unit Cost" align="right"></GridColumn>
-            <GridColumn field="attr" title="Attribute" width="30%"></GridColumn>
-            <GridColumn field="status" title="Status" align="center"></GridColumn>
-        </DataGrid>
+            <GridColumn field="id" title="id"></GridColumn>
+            <GridColumn field="url" title="url"></GridColumn>
+            <GridColumn field="icon" title="icon"></GridColumn>
+            <GridColumn field="parentId" title="parentId"></GridColumn>
+            <GridColumn field="parentIdList" title="parentIdList"></GridColumn>
+            <GridColumn field="remark" title="remark"></GridColumn>
+        </TreeGrid>
     </div>
 </template>
 
 <script>
+    import {listMenu,getMenuListUser} from './init'
     export default {
         data() {
             return {
-                data: [
-                    {"code":"FI-SW-01","name":"Koi","unitcost":10.00,"status":"P","listprice":36.50,"attr":"Large","itemid":"EST-1"},
-                    {"code":"K9-DL-01","name":"Dalmation","unitcost":12.00,"status":"P","listprice":18.50,"attr":"Spotted Adult Female","itemid":"EST-10"},
-                    {"code":"RP-SN-01","name":"Rattlesnake","unitcost":12.00,"status":"P","listprice":38.50,"attr":"Venomless","itemid":"EST-11"},
-                    {"code":"RP-SN-01","name":"Rattlesnake","unitcost":12.00,"status":"P","listprice":26.50,"attr":"Rattleless","itemid":"EST-12"},
-                    {"code":"RP-LI-02","name":"Iguana","unitcost":12.00,"status":"P","listprice":35.50,"attr":"Green Adult","itemid":"EST-13"},
-                    {"code":"FL-DSH-01","name":"Manx","unitcost":12.00,"status":"P","listprice":158.50,"attr":"Tailless","itemid":"EST-14"},
-                    {"code":"FL-DSH-01","name":"Manx","unitcost":12.00,"status":"P","listprice":83.50,"attr":"With tail","itemid":"EST-15"},
-                    {"code":"FL-DLH-02","name":"Persian","unitcost":12.00,"status":"P","listprice":23.50,"attr":"Adult Female","itemid":"EST-16"},
-                    {"code":"FL-DLH-02","name":"Persian","unitcost":12.00,"status":"P","listprice":89.50,"attr":"Adult Male","itemid":"EST-17"},
-                    {"code":"AV-CB-01","name":"Amazon Parrot","unitcost":92.00,"status":"P","listprice":63.50,"attr":"Adult Male","itemid":"EST-18"}
-                ]
-            }
+                data:[],
+                width: 200,
+                collapsed: false,
+                selection: null,
+                menus: [
+                    {
+                        text: "Forms",
+                        iconCls: "fa fa-wpforms",
+                        children: [
+                            {
+                                text: "Form Element"
+                            },
+                            {
+                                text: "Wizard"
+                            },
+                            {
+                                text: "File Upload"
+                            }
+                        ]
+                    },
+                    {
+                        text: "Mail",
+                        iconCls: "fa fa-at",
+                        selected: true,
+                        children: [
+                            {
+                                text: "Inbox"
+                            },
+                            {
+                                text: "Sent"
+                            },
+                            {
+                                text: "Trash",
+                                children: [
+                                    {
+                                        text: "Item1"
+                                    },
+                                    {
+                                        text: "Item2"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        text: "Layout",
+                        iconCls: "fa fa-table",
+                        children: [
+                            {
+                                text: "Panel"
+                            },
+                            {
+                                text: "Accordion"
+                            },
+                            {
+                                text: "Tabs"
+                            }
+                        ]
+                    }
+                ],
+                query:{
+                    pageNo:1,
+                    size:10,
+                }
+            };
+        },
+        created() {
+            this.init();
+            listMenu({}).then(res=>{
+                var arr = new Array();
+                console.log(res.data);
+                res.data.forEach(function (item,index) {
+
+                })
+                this.data = this.menu(res.data);
+                console.log(this.menu(res.data))
+            })
+        },
+        methods: {
+            toggle() {
+                this.collapsed = !this.collapsed;
+                this.width = this.collapsed ? 50 : 200;
+            },
+            init(){
+                getMenuListUser(this.query).then(res=>{
+                    console.log(res)
+                })
+            },
+            menu(arr){
+                var menus = new Array();
+                for(var i=0;i<arr.length;i++){
+                    var pmenu = {};
+                    pmenu.name = arr[i].name;
+                    pmenu.id = arr[i].id;
+                    pmenu.url = arr[i].url;
+                    pmenu.icon = arr[i].icon;
+                    pmenu.parentId = arr[i].parentId;
+                    pmenu.parentIdList = arr[i].parentIdList;
+                    pmenu.remark = arr[i].remark;
+                    if(arr[i].chirldMenuList){
+                        pmenu.children = this.menu(arr[i].chirldMenuList)
+                    }
+                    menus.push(pmenu);
+                }
+                return menus;
+            },
         }
-    }
+    };
 </script>
 
 <style scoped>
+    @import "//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css";
 
+    .sidemenu .accordion .panel-title {
+        color: #b8c7ce;
+    }
+    .sidemenu .accordion .accordion-header {
+        background: #222d32;
+        color: #b8c7ce;
+    }
+    .sidemenu .accordion .accordion-body {
+        background: #2c3b41;
+        color: #8aa4af;
+    }
+    .sidemenu .accordion .accordion-header-selected {
+        background: #1e282c;
+    }
+    .sidemenu .tree-node-hover {
+        background: #2c3b41;
+        color: #fff;
+    }
+    .sidemenu .tree-node-selected {
+        background: #2c3b41;
+        color: #fff;
+    }
+    .sidemenu .accordion-header .panel-tool {
+        display: none;
+    }
+    .sidemenu .accordion-header::after,
+    .sidemenu .tree-node-nonleaf::after {
+        display: inline-block;
+        vertical-align: top;
+        border-style: solid;
+        transform: rotate(45deg);
+        width: 4px;
+        height: 4px;
+        content: "";
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        margin-top: -3px;
+        border-width: 0 1px 1px 0;
+    }
+    .sidemenu .accordion-header-selected::after {
+        transform: rotate(-135deg);
+    }
+    .sidemenu .tree-node-nonleaf::after {
+        transform: rotate(-135deg);
+    }
+    .sidemenu .tree-node-nonleaf-collapsed::after {
+        transform: rotate(45deg);
+    }
+    .sidemenu-collapsed .accordion-header::after {
+        display: none;
+    }
+    .sidemenu-tooltip .accordion {
+        border-color: #1e282c;
+    }
 </style>
